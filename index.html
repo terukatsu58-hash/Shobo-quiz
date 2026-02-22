@@ -4,78 +4,110 @@
 <meta charset="UTF-8">
 <title>消防設備士 甲1類 クイズ</title>
 <style>
-body { font-family: sans-serif; padding: 20px; background:#f4f6f8;}
-h1 { font-size:22px;}
-button { display:block; margin:10px 0; padding:10px; width:100%;}
+body { font-family: sans-serif; padding:20px; background:#f4f6f8;}
+button { display:block; margin:8px 0; padding:10px; width:100%;}
 .correct { background:#c8f7c5;}
 .wrong { background:#f7c5c5;}
+select { padding:8px; margin-bottom:15px;}
 </style>
 </head>
 <body>
 
-<h1>消防設備士 甲1類 クイズ</h1>
+<h2>消防設備士 甲1類 クイズ</h2>
+
+<label>分野を選択：</label>
+<select id="categorySelect">
+<option value="全部">全部</option>
+<option value="法令">法令</option>
+<option value="構造">構造</option>
+<option value="計算">計算</option>
+</select>
+
+<button onclick="startQuiz()">スタート</button>
+
 <p id="question"></p>
 <div id="choices"></div>
 <p id="result"></p>
 <p id="score"></p>
 
 <script>
-const quiz = [
+const allQuestions = [
+
 {
+category:"法令",
 question:"屋内消火栓設備の放水量は1口あたり毎分何L以上か？",
 choices:["65L","100L","130L","200L"],
 answer:2,
 explanation:"屋内消火栓設備は1口あたり毎分130L以上。"
 },
 {
-question:"スプリンクラー設備の感熱部の作動温度は一般に何℃？",
+category:"構造",
+question:"スプリンクラーの一般的作動温度は？",
 choices:["57℃","68℃","79℃","93℃"],
 answer:1,
-explanation:"一般的なスプリンクラーは68℃。"
+explanation:"標準型は68℃。"
 },
 {
-question:"消火ポンプの起動方式で最も一般的なのは？",
-choices:["手動式","直入始動","スター・デルタ始動","インバータ制御"],
-answer:2,
-explanation:"容量が大きいためスター・デルタ始動が一般的。"
+category:"計算",
+question:"放水量130L/minを秒に換算すると？",
+choices:["1.3L","2.17L","13L","21.7L"],
+answer:1,
+explanation:"130÷60＝約2.17L。"
 }
+
 ];
 
+let quiz = [];
 let current = 0;
 let score = 0;
 
+function shuffle(array){
+return array.sort(()=>Math.random()-0.5);
+}
+
+function startQuiz(){
+const selected = document.getElementById("categorySelect").value;
+quiz = selected==="全部"
+? [...allQuestions]
+: allQuestions.filter(q=>q.category===selected);
+
+quiz = shuffle(quiz);
+current = 0;
+score = 0;
+document.getElementById("score").textContent="";
+loadQuiz();
+}
+
 function loadQuiz(){
-document.getElementById("question").textContent = quiz[current].question;
-const choicesDiv = document.getElementById("choices");
-choicesDiv.innerHTML = "";
+if(current>=quiz.length){
+alert("終了！スコア："+score+"/"+quiz.length);
+return;
+}
+document.getElementById("question").textContent=quiz[current].question;
+const div=document.getElementById("choices");
+div.innerHTML="";
 quiz[current].choices.forEach((choice,index)=>{
-const btn = document.createElement("button");
-btn.textContent = choice;
-btn.onclick = ()=>checkAnswer(index,btn);
-choicesDiv.appendChild(btn);
+const btn=document.createElement("button");
+btn.textContent=choice;
+btn.onclick=()=>checkAnswer(index,btn);
+div.appendChild(btn);
 });
 }
 
 function checkAnswer(index,btn){
-const result = document.getElementById("result");
-if(index === quiz[current].answer){
+const result=document.getElementById("result");
+if(index===quiz[current].answer){
 score++;
 btn.classList.add("correct");
-result.textContent = "正解！ " + quiz[current].explanation;
+result.textContent="正解！ "+quiz[current].explanation;
 }else{
 btn.classList.add("wrong");
-result.textContent = "不正解… " + quiz[current].explanation;
+result.textContent="不正解… "+quiz[current].explanation;
 }
-document.getElementById("score").textContent = "スコア: " + score;
+document.getElementById("score").textContent="スコア: "+score;
 current++;
-if(current < quiz.length){
-setTimeout(loadQuiz,2000);
-}else{
-setTimeout(()=>alert("終了！最終スコア: "+score),2000);
+setTimeout(loadQuiz,1500);
 }
-}
-
-loadQuiz();
 </script>
 
 </body>
