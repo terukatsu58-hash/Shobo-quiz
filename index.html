@@ -5,10 +5,13 @@
 <title>消防設備士 甲1類 クイズ</title>
 <style>
 body { font-family: sans-serif; padding:20px; background:#f4f6f8;}
-button { display:block; margin:8px 0; padding:10px; width:100%;}
+button { display:block; margin:8px 0; padding:10px; width:100%; font-size:16px; }
 .correct { background:#c8f7c5;}
 .wrong { background:#f7c5c5;}
-select { padding:8px; margin-bottom:15px;}
+select { padding:8px; margin-bottom:15px; font-size:16px;}
+label { display:block; margin-top:10px; font-weight:bold;}
+#question { margin-top:20px; font-size:18px; }
+#score { font-weight:bold; margin-top:15px; }
 </style>
 </head>
 <body>
@@ -17,10 +20,17 @@ select { padding:8px; margin-bottom:15px;}
 
 <label>分野を選択：</label>
 <select id="categorySelect">
-<option value="全部">全部</option>
-<option value="法令">法令</option>
-<option value="構造">構造</option>
-<option value="計算">計算</option>
+  <option value="全部">全部</option>
+  <option value="法令">法令</option>
+  <option value="構造">構造</option>
+  <option value="計算">計算</option>
+</select>
+
+<label>出題数を選択：</label>
+<select id="numSelect">
+  <option value="10">10問</option>
+  <option value="20">20問</option>
+  <option value="50">50問</option>
 </select>
 
 <button onclick="startQuiz()">スタート</button>
@@ -30,60 +40,71 @@ select { padding:8px; margin-bottom:15px;}
 <p id="result"></p>
 <p id="score"></p>
 
+<script src="questions.js"></script>
 <script>
-<script src="questions.js">
-</script>
-
 let quiz = [];
 let current = 0;
 let score = 0;
 
+// Fisher-Yatesシャッフル
 function shuffle(array){
-return array.sort(()=>Math.random()-0.5);
+  for(let i=array.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [array[i],array[j]]=[array[j],array[i]];
+  }
+  return array;
 }
 
 function startQuiz(){
-const selected = document.getElementById("categorySelect").value;
-quiz = selected==="全部"
-? [...allQuestions]
-: allQuestions.filter(q=>q.category===selected);
+  const selectedCat = document.getElementById("categorySelect").value;
+  const selectedNum = parseInt(document.getElementById("numSelect").value);
 
-quiz = shuffle(quiz);
-current = 0;
-score = 0;
-document.getElementById("score").textContent="";
-loadQuiz();
+  // 分野で絞り込み
+  let filtered = selectedCat==="全部"
+    ? [...allQuestions]
+    : allQuestions.filter(q=>q.category===selectedCat);
+
+  // シャッフルして指定数だけ抽出
+  quiz = shuffle(filtered).slice(0, selectedNum);
+
+  current=0;
+  score=0;
+  document.getElementById("score").textContent="";
+  document.getElementById("result").textContent="";
+  document.getElementById("question").textContent="";
+  document.getElementById("choices").innerHTML="";
+  loadQuiz();
 }
 
 function loadQuiz(){
-if(current>=quiz.length){
-alert("終了！スコア："+score+"/"+quiz.length);
-return;
-}
-document.getElementById("question").textContent=quiz[current].question;
-const div=document.getElementById("choices");
-div.innerHTML="";
-quiz[current].choices.forEach((choice,index)=>{
-const btn=document.createElement("button");
-btn.textContent=choice;
-btn.onclick=()=>checkAnswer(index,btn);
-div.appendChild(btn);
-});
+  if(current>=quiz.length){
+    alert("終了！スコア："+score+"/"+quiz.length);
+    return;
+  }
+  document.getElementById("question").textContent=quiz[current].question;
+  const div=document.getElementById("choices");
+  div.innerHTML="";
+  quiz[current].choices.forEach((choice,index)=>{
+    const btn=document.createElement("button");
+    btn.textContent=choice;
+    btn.onclick=()=>checkAnswer(index,btn);
+    div.appendChild(btn);
+  });
 }
 
 function checkAnswer(index,btn){
-const result=document.getElementById("result");
-if(index===quiz[current].answer){
-score++;
-btn.classList.add("correct");
-result.textContent="正解！ "+quiz[current].explanation;
-}else{
-btn.classList.add("wrong");
-result.textContent="不正解… "+quiz[current].explanation;
-}
-document.getElementById("score").textContent="スコア: "+score;
-current++;
-setTimeout(loadQuiz,1500);
+  const result=document.getElementById("result");
+  if(index===quiz[current].answer){
+    score++;
+    btn.classList.add("correct");
+    result.textContent="正解！ "+quiz[current].explanation;
+  }else{
+    btn.classList.add("wrong");
+    result.textContent="不正解… "+quiz[current].explanation;
+  }
+  document.getElementById("score").textContent="スコア: "+score;
+  current++;
+  setTimeout(loadQuiz,1500);
 }
 </script>
 
