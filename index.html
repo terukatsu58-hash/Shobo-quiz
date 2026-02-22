@@ -59,10 +59,14 @@ function startQuiz(){
   const selectedCat = document.getElementById("categorySelect").value;
   const selectedNum = parseInt(document.getElementById("numSelect").value);
 
-  // 分野で絞り込み
   let filtered = selectedCat==="全部"
     ? [...allQuestions]
     : allQuestions.filter(q=>q.category===selectedCat);
+
+  if(filtered.length === 0){
+    alert("選択した分野に問題がありません");
+    return;
+  }
 
   // シャッフルして指定数だけ抽出
   quiz = shuffle(filtered).slice(0, selectedNum);
