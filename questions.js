@@ -34,7 +34,7 @@ const allQuestions = [
     category:"法令",
     question:"消防法令上、防炎規制の対象物とならない物品は、次のうちどれか。",
     choices:["工事用シート","展示用の合板","カーテン","ビニル床シート"],
-    answer:3,
+    answer:2,
     explanation:"ビニル床シートは防炎規制の対象とならない物品である。"
   },
   {
